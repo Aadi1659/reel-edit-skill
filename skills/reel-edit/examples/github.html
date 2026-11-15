@@ -1,0 +1,47 @@
+<template>
+  <style>
+    @font-face { font-family: "Instrument Serif"; font-style: italic; font-weight: 400; src: url("assets/fonts/InstrumentSerif-Italic.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #f3efe8; }
+    #gh-stage { position: absolute; inset: 0; perspective: 2400px; }
+    #gh-card { position: absolute; left: 160px; top: 190px; width: 760px; height: 774px; border-radius: 28px; overflow: hidden; background: #fff;
+      box-shadow: 0 40px 90px rgba(40,30,20,0.22), 0 6px 18px rgba(40,30,20,0.12); }
+    #gh-img { position: absolute; left: 0; top: 0; width: 760px; }
+    #gh-ring { position: absolute; left: 0; top: 0; width: 760px; height: 774px; overflow: visible; }
+    .txt { position: absolute; left: 0; right: 0; top: 0; height: 1290px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; color: #141414; }
+    .sm { font-family: "Inter", sans-serif; font-weight: 600; font-size: 64px; letter-spacing: -0.015em; display: flex; gap: 14px; margin-bottom: 4px; }
+    .bg { font-family: "Instrument Serif", serif; font-style: italic; line-height: 0.9; letter-spacing: -0.02em; }
+    .w { display: inline-block; }
+  </style>
+  <div id="root" data-composition-id="github" data-width="1080" data-height="1920">
+    <div id="gh-stage">
+      <div id="gh-card">
+        <img id="gh-img" src="assets/shots/github-top.png" alt="" />
+        <svg id="gh-ring" viewBox="0 0 760 774"><ellipse id="gh-ell" cx="104" cy="683" rx="96" ry="34" fill="none" stroke="#d97757" stroke-width="5" stroke-linecap="butt" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" transform="rotate(-3 104 683)"/></svg>
+      </div>
+    </div>
+    <div id="gh-p1" class="clip txt" data-start="0" data-duration="0.837">
+      <div class="sm"><span class="w" data-t="0">free,</span></div>
+      <div class="bg" style="font-size: 176px"><span class="w" data-t="0.206">open</span> <span class="w" data-t="0.576">source.</span></div>
+    </div>
+    <div id="gh-p2" class="clip txt" data-start="0.837" data-duration="1.249">
+      <div class="sm"><span class="w" data-t="0.837">6,000</span><span class="w" data-t="1.466">se zyada</span></div>
+      <div class="bg" style="font-size: 220px"><span class="w" data-t="1.631">stars.</span></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const root = document.querySelector('[data-composition-id="github"]');
+    tl.fromTo("#gh-card", { y: 260, rotationX: 22, rotationY: 12, opacity: 0 }, { y: 0, rotationX: 7, rotationY: 5, opacity: 1, duration: 0.46, ease: "expo.out", transformOrigin: "50% 60%" }, 0);
+    tl.to("#gh-card", { rotationX: 3, rotationY: 2, duration: 0.37, ease: "none" }, 0.46);
+    // Push in on the stars row and circle it.
+    tl.to("#gh-card", { rotationX: 0, rotationY: 0, scale: 1.9, x: 260, y: -233, duration: 0.523, ease: "power3.inOut", transformOrigin: "120px 683px" }, 0.83);
+    tl.to("#gh-ell", { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, 1.287);
+    tl.to("#gh-card", { scale: 1.98, duration: 0.733, ease: "none", transformOrigin: "120px 683px" }, 1.353);
+    root.querySelectorAll(".w[data-t]").forEach((el) => {
+      const t = parseFloat(el.dataset.t), big = el.closest(".bg");
+      tl.fromTo(el, { opacity: 0, y: big ? 40 : 18, filter: "blur(12px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: big ? 0.42 : 0.3, ease: "power3.out" }, Math.max(0.02, t));
+    });
+    tl.to("#gh-p1", { opacity: 0, duration: 0.1 }, 0.803);
+    window.__timelines["github"] = tl;
+  </script>
+</template>

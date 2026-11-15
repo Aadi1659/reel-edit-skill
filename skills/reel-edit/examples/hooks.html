@@ -1,0 +1,64 @@
+<template>
+  <style>
+    @font-face { font-family: "Instrument Serif"; font-style: italic; font-weight: 400; src: url("assets/fonts/InstrumentSerif-Italic.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #f3efe8; }
+    #hk-stage { position: absolute; inset: 0; perspective: 2200px; }
+    #hk-chip { position: absolute; left: 0; right: 0; top: 250px; display: flex; justify-content: center; }
+    #hk-chip span { font-family: "JetBrains Mono", monospace; font-weight: 500; font-size: 48px; color: #141414; padding: 14px 30px; border-radius: 40px; border: 2px solid rgba(20,20,20,0.18); background: #fff; }
+    #hk-chip b { color: #d97757; font-weight: 500; }
+    .card {
+      position: absolute; left: 100px; width: 880px; min-height: 196px; border-radius: 28px; background: #fff;
+      box-shadow: 0 30px 70px rgba(40,30,20,0.16), 0 4px 12px rgba(40,30,20,0.08);
+      padding: 28px 200px 28px 36px; color: #141414;
+    }
+    .card .lab { font-family: "JetBrains Mono", monospace; font-size: 28px; color: #8a8178; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .card .hk { font-family: "Inter", sans-serif; font-weight: 700; font-size: 44px; line-height: 1.2; letter-spacing: -0.01em; }
+    .card .sc { position: absolute; right: 34px; top: 50%; margin-top: -60px; width: 140px; height: 120px; text-align: right;
+      font-family: "Instrument Serif", serif; font-style: italic; font-size: 120px; line-height: 1; color: #b9b1a7; }
+    #c2 .sc { color: #d97757; }
+    #c1 { top: 352px; } #c2 { top: 562px; } #c3 { top: 772px; }
+    .txt { position: absolute; left: 0; right: 0; top: 0; height: 1290px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; color: #141414; }
+    .sm { font-family: "Inter", sans-serif; font-weight: 600; font-size: 64px; letter-spacing: -0.015em; display: flex; gap: 14px; margin-bottom: 4px; }
+    .bg { font-family: "Instrument Serif", serif; font-style: italic; font-size: 210px; line-height: 0.9; letter-spacing: -0.02em; }
+    .w { display: inline-block; }
+  </style>
+  <div id="root" data-composition-id="hooks" data-width="1080" data-height="1920">
+    <div id="hk-stage">
+      <div id="hk-chip"><span><b>/</b>ig-reel</span></div>
+      <div class="card" id="c1"><div class="lab">HOOK 1</div><div class="hk">Claude just killed Instagram.</div><div class="sc" id="s1">57</div></div>
+      <div class="card" id="c2"><div class="lab">HOOK 2</div><div class="hk">13 free Claude skills just killed your social media manager.</div><div class="sc" id="s2">0</div></div>
+      <div class="card" id="c3"><div class="lab">HOOK 3</div><div class="hk">Bhai screenshot le lo: 13 free skills.</div></div>
+    </div>
+    <div id="hk-t1" class="clip txt" data-start="0.175" data-duration="1.092">
+      <div class="sm"><span class="w" data-t="0.175">ig reel</span></div>
+      <div class="bg"><span class="w" data-t="0.301">3</span> <span class="w" data-t="0.481">hooks.</span></div>
+    </div>
+    <div id="hk-t2" class="clip txt" data-start="1.28" data-duration="1.86">
+      <div class="sm"><span class="w" data-t="1.28">aur</span><span class="w" data-t="1.55">100 mein se</span></div>
+      <div class="bg"><span class="w" data-t="1.981">score.</span></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const root = document.querySelector('[data-composition-id="hooks"]');
+    tl.fromTo("#hk-chip span", { y: -20, opacity: 0, scale: 0.9 }, { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, 0.005);
+    // Deal the three hooks
+    [["#c1", 0.301, -3], ["#c2", 0.455, 2], ["#c3", 0.558, -2]].forEach(([id, t, r]) => {
+      tl.fromTo(id, { x: 700, rotationY: -35, rotation: r * 3, opacity: 0 }, { x: 0, rotationY: 0, rotation: r * 0.4, opacity: 1, duration: 0.55, ease: "expo.out" }, t);
+    });
+    tl.set("#s1", { opacity: 0 }, 0);
+    // Scoring: the losers step back, the 100 comes forward.
+    tl.to("#s1", { opacity: 1, duration: 0.25 }, 1.55);
+    tl.to(["#c1", "#c3"], { opacity: 0.42, scale: 0.95, duration: 0.4, ease: "power2.out" }, 1.672);
+    tl.to("#c2", { scale: 1.06, rotation: 0, duration: 0.5, ease: "back.out(1.6)" }, 1.672);
+    const n = { v: 0 };
+    tl.fromTo(n, { v: 0 }, { v: 100, duration: 0.6, ease: "power2.out", onUpdate: () => { const el = document.getElementById("s2"); if (el) el.textContent = Math.round(n.v); } }, 1.563);
+    tl.to(["#c1", "#c2", "#c3"], { y: "-=30", duration: 1.262, ease: "none" }, 1.878);
+    root.querySelectorAll(".w[data-t]").forEach((el) => {
+      const t = parseFloat(el.dataset.t), big = el.closest(".bg");
+      tl.fromTo(el, { opacity: 0, y: big ? 40 : 18, filter: "blur(12px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: big ? 0.42 : 0.3, ease: "power3.out" }, t);
+    });
+    tl.to("#hk-t1", { opacity: 0, duration: 0.1 }, 1.222);
+    window.__timelines["hooks"] = tl;
+  </script>
+</template>

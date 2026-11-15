@@ -1,0 +1,62 @@
+<template>
+  <!-- Kinetic type. One .grp per phrase: small Inter line (.sm) + huge Instrument Serif italic keyword (.bg).
+       Every .w with data-t appears on its spoken time (from edit/words.json) with blur-to-sharp rise.
+       Group data-start/data-duration = phrase on screen; the next group's start is this one's end.
+       Bottom of the text block sits at y 1290 (safe zone). Big sizes: 170-240px, shorter word = bigger. -->
+  <style>
+    @font-face { font-family: "Instrument Serif"; font-style: italic; font-weight: 400; src: url("assets/fonts/InstrumentSerif-Italic.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; overflow: visible; background: transparent; }
+    .grp { position: absolute; left: 0; right: 0; top: 0; height: 1290px; display: flex; flex-direction: column; justify-content: flex-end;
+      align-items: center; text-align: center; padding: 0 70px; color: #fff; }
+    .sm { font-family: "Inter", sans-serif; font-weight: 600; font-size: 64px; line-height: 1.12; letter-spacing: -0.01em;
+      text-shadow: 0 2px 18px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.5); margin-bottom: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 0 14px; flex-wrap: wrap; }
+    .bg { font-family: "Instrument Serif", serif; font-style: italic; font-weight: 400; line-height: 0.92; letter-spacing: -0.02em;
+      text-shadow: 0 4px 30px rgba(0,0,0,0.45); max-width: 960px; }
+    .w { display: inline-block; }
+    .acc { color: #d97757; }
+    .logo { height: 60px; width: 60px; display: inline-block; }
+    /* white rounded logo badge above a phrase */
+    .badge { width: 132px; height: 132px; border-radius: 34px; background: #fff; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.35); margin-bottom: 30px; }
+    .badge img { width: 84px; height: 84px; }
+    .pair { display: flex; gap: 34px; align-items: center; margin-bottom: 34px; }
+    .pair .badge { margin-bottom: 0; }
+    .pair .x { font-family: "Inter", sans-serif; font-size: 56px; color: rgba(255,255,255,0.8); }
+    /* coral strike-through: add class "strike" + id, animate --s 0 -> 1 */
+    .strike { position: relative; }
+    .strike::after { content: ""; position: absolute; left: -2%; right: -2%; top: 54%; height: 7px; background: #d97757;
+      transform-origin: 0 50%; transform: scaleX(var(--s, 0)); border-radius: 4px; }
+    /* IG comment box (CTA "comment X"): see examples/type.html #cbox for the typed version */
+  </style>
+  <div id="root" data-composition-id="type" data-width="1080" data-height="1920" data-layout-allow-overflow>
+    <!-- g1 = hook / cover frame: on screen at frame 0, no reveal on the big word -->
+    <div id="g1" class="clip grp" data-start="0" data-duration="1.8">
+      <div class="sm"><img class="logo" src="assets/logos/claude.svg" alt="" /><span class="w">small line</span></div>
+      <div class="bg" style="font-size: 228px"><span class="w" id="g1-big">Keyword.</span></div>
+    </div>
+    <div id="g2" class="clip grp" data-start="1.8" data-duration="1.2">
+      <div class="sm"><span class="w" data-t="1.8">word</span><span class="w" data-t="2.0">word</span></div>
+      <div class="bg" style="font-size: 220px"><span class="w" data-t="2.3">big</span> <span class="w acc" data-t="2.6">word.</span></div>
+    </div>
+    <!-- last group: give it id="gLast" so it does not fade (loop back to frame 0) -->
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const root = document.querySelector('[data-composition-id="type"]');
+    root.querySelectorAll(".w[data-t]").forEach((el) => {
+      const t = parseFloat(el.dataset.t), big = el.closest(".bg");
+      tl.fromTo(el, { opacity: 0, y: big ? 40 : 18, filter: "blur(12px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: big ? 0.42 : 0.3, ease: "power3.out" }, Math.max(0, t - 0.04));
+    });
+    tl.fromTo("#g1-big", { scale: 1.06 }, { scale: 1, duration: 1.4, ease: "power2.out" }, 0);
+    // Strike example: tl.fromTo("#g6-gpt", { "--s": 0 }, { "--s": 1, duration: 0.35, ease: "power2.inOut" }, T);
+    root.querySelectorAll(".grp").forEach((g) => {
+      if (g.id === "gLast") return;
+      const e = parseFloat(g.dataset.start) + parseFloat(g.dataset.duration);
+      tl.to(g, { opacity: 0, duration: 0.1, ease: "power2.in" }, e - 0.1);
+      tl.set(g, { opacity: 0 }, e);
+    });
+    window.__timelines["type"] = tl;
+  </script>
+</template>

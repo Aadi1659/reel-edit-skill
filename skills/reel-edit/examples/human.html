@@ -1,0 +1,59 @@
+<template>
+  <style>
+    @font-face { font-family: "Instrument Serif"; font-style: italic; font-weight: 400; src: url("assets/fonts/InstrumentSerif-Italic.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #f3efe8; }
+    #hu-stage { position: absolute; inset: 0; perspective: 2200px; }
+    #hu-chip { position: absolute; left: 0; right: 0; top: 250px; display: flex; justify-content: center; }
+    #hu-chip span { font-family: "JetBrains Mono", monospace; font-weight: 500; font-size: 48px; color: #141414; padding: 14px 30px; border-radius: 40px; border: 2px solid rgba(20,20,20,0.18); background: #fff; }
+    #hu-chip b { color: #d97757; font-weight: 500; }
+    #hu-card { position: absolute; left: 100px; top: 330px; width: 880px; height: 560px; border-radius: 30px; background: #fff;
+      box-shadow: 0 30px 70px rgba(40,30,20,0.16), 0 4px 12px rgba(40,30,20,0.08); }
+    .lab { position: absolute; left: 44px; top: 36px; font-family: "JetBrains Mono", monospace; font-size: 28px; letter-spacing: 0.08em; color: #8a8178; }
+    .body { position: absolute; left: 44px; right: 44px; top: 96px; font-family: "Inter", sans-serif; font-weight: 500; font-size: 46px; line-height: 1.38; color: #141414; }
+    .s { position: relative; display: inline; }
+    .s::after { content: ""; position: absolute; left: -1%; right: -1%; top: 52%; height: 6px; background: #d97757; border-radius: 3px; transform-origin: 0 50%; transform: scaleX(var(--k, 0)); }
+    #hu-after .body { font-size: 54px; font-weight: 700; top: 120px; }
+    #hu-after .lab { color: #d97757; }
+    .txt { position: absolute; left: 0; right: 0; top: 0; height: 1290px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; color: #141414; }
+    .sm { font-family: "Inter", sans-serif; font-weight: 600; font-size: 64px; letter-spacing: -0.015em; display: flex; gap: 14px; margin-bottom: 4px; }
+    .bg { font-family: "Instrument Serif", serif; font-style: italic; font-size: 210px; line-height: 0.9; letter-spacing: -0.02em; }
+    .w { display: inline-block; }
+  </style>
+  <div id="root" data-composition-id="human" data-width="1080" data-height="1920">
+    <div id="hu-stage">
+      <div id="hu-chip"><span><b>/</b>ig-human</span></div>
+      <div id="hu-card">
+        <div id="hu-before">
+          <div class="lab">AI NE LIKHA</div>
+          <div class="body"><span class="s" id="s1">In today’s fast-paced world,</span> let’s <span class="s" id="s2">delve into</span> these <span class="s" id="s3">game-changing</span> AI tools <span class="s" id="s4">—</span> and <span class="s" id="s5">unlock your true potential!</span></div>
+        </div>
+        <div id="hu-after">
+          <div class="lab">AB</div>
+          <div class="body">Ye 13 free tools try karo. Sach mein kaam aayenge.</div>
+        </div>
+      </div>
+    </div>
+    <div class="txt">
+      <div class="sm"><span class="w" data-t="0.731">ai</span><span class="w" data-t="0.9">wali</span><span class="w" data-t="1.081">bhasha</span></div>
+      <div class="bg"><span class="w" data-t="1.51">hata di.</span></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const root = document.querySelector('[data-composition-id="human"]');
+    tl.fromTo("#hu-chip span", { y: -20, opacity: 0, scale: 0.9 }, { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, 0.201);
+    tl.fromTo("#hu-card", { y: 220, rotationX: 24, opacity: 0 }, { y: 0, rotationX: 6, opacity: 1, duration: 0.523, ease: "expo.out", transformOrigin: "50% 70%" }, 0);
+    tl.to("#hu-card", { rotationX: 0, duration: 1.829, ease: "none" }, 0.523);
+    tl.set("#hu-after", { opacity: 0 }, 0);
+    [["#s1", 0.731], ["#s2", 0.9], ["#s3", 0.976], ["#s4", 1.032], ["#s5", 1.081]].forEach(([id, t]) => {
+      tl.fromTo(id, { "--k": 0 }, { "--k": 1, duration: 0.22, ease: "power2.out" }, t);
+    });
+    tl.to("#hu-before", { opacity: 0, y: -20, filter: "blur(10px)", duration: 0.3, ease: "power2.in" }, 1.51);
+    tl.fromTo("#hu-after", { opacity: 0, y: 20, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.4, ease: "power3.out" }, 1.614);
+    root.querySelectorAll(".w[data-t]").forEach((el) => {
+      const t = parseFloat(el.dataset.t), big = el.closest(".bg");
+      tl.fromTo(el, { opacity: 0, y: big ? 40 : 18, filter: "blur(12px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: big ? 0.42 : 0.3, ease: "power3.out" }, t);
+    });
+    window.__timelines["human"] = tl;
+  </script>
+</template>

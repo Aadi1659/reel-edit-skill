@@ -1,0 +1,29 @@
+<template>
+  <!-- Dark statement cutaway: near-black, a real logo, stacked serif words on their spoken times, coral tag line.
+       Times are LOCAL (0 = host data-start). -->
+  <style>
+    @font-face { font-family: "Instrument Serif"; font-style: italic; font-weight: 400; src: url("assets/fonts/InstrumentSerif-Italic.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0e0e0e; }
+    #st-logo { position: absolute; left: 470px; top: 300px; width: 140px; height: 140px; }
+    #st-words { position: absolute; left: 0; right: 0; top: 520px; text-align: center; color: #f3efe8;
+      font-family: "Instrument Serif", serif; font-style: italic; font-size: 220px; line-height: 0.95; letter-spacing: -0.02em; }
+    #st-words div { display: block; }
+    #st-tag { position: absolute; left: 0; right: 0; top: 1220px; text-align: center; font-family: "Inter", sans-serif; font-weight: 600;
+      font-size: 72px; color: #d97757; letter-spacing: 0.02em; }
+  </style>
+  <div id="root" data-composition-id="statement" data-width="1080" data-height="1920">
+    <img id="st-logo" src="assets/logos/instagram.svg" alt="" />
+    <div id="st-words"><div id="sw1">one.</div><div id="sw2">two.</div><div id="sw3">three.</div></div>
+    <div id="st-tag">tag.</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#st-logo", { scale: 0.6, opacity: 0, rotation: -10 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 0);
+    [["#sw1", 0], ["#sw2", 0.58], ["#sw3", 1.0]].forEach(([id, t]) => {
+      tl.fromTo(id, { opacity: 0, y: 50, filter: "blur(14px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.32, ease: "power3.out" }, t);
+    });
+    tl.fromTo("#st-tag", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.2, ease: "power3.out" }, 1.23);
+    tl.to("#st-words", { scale: 1.04, duration: 1.6, ease: "none", transformOrigin: "50% 50%" }, 0);
+    window.__timelines["statement"] = tl;
+  </script>
+</template>

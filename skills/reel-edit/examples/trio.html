@@ -1,0 +1,30 @@
+<template>
+  <style>
+    @font-face { font-family: "Instrument Serif"; font-style: italic; font-weight: 400; src: url("assets/fonts/InstrumentSerif-Italic.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0e0e0e; }
+    #tr-logo { position: absolute; left: 470px; top: 300px; width: 140px; height: 140px; }
+    #tr-words { position: absolute; left: 0; right: 0; top: 520px; text-align: center; color: #f3efe8;
+      font-family: "Instrument Serif", serif; font-style: italic; font-size: 220px; line-height: 0.95; letter-spacing: -0.02em; }
+    #tr-words div { display: block; }
+    #tr-sab { position: absolute; left: 0; right: 0; top: 1220px; text-align: center; font-family: "Inter", sans-serif; font-weight: 600; font-size: 72px; color: #d97757; letter-spacing: 0.02em; }
+  </style>
+  <div id="root" data-composition-id="trio" data-width="1080" data-height="1920">
+    <img id="tr-logo" src="assets/logos/instagram.svg" alt="" />
+    <div id="tr-words">
+      <div id="tw1">caption.</div>
+      <div id="tw2">reply.</div>
+      <div id="tw3">DMs.</div>
+    </div>
+    <div id="tr-sab">sab.</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#tr-logo", { scale: 0.6, opacity: 0, rotation: -10 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 0);
+    [["#tw1", 0], ["#tw2", 0.581], ["#tw3", 1.001]].forEach(([id, t]) => {
+      tl.fromTo(id, { opacity: 0, y: 50, filter: "blur(14px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.32, ease: "power3.out" }, t);
+    });
+    tl.fromTo("#tr-sab", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.2, ease: "power3.out" }, 1.23);
+    tl.to("#tr-words", { scale: 1.04, duration: 1.6, ease: "none", transformOrigin: "50% 50%" }, 0);
+    window.__timelines["trio"] = tl;
+  </script>
+</template>

@@ -1,0 +1,124 @@
+<template>
+  <style>
+    @font-face { font-family: "Instrument Serif"; font-style: italic; font-weight: 400; src: url("assets/fonts/InstrumentSerif-Italic.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; overflow: visible; background: transparent; }
+    .grp {
+      position: absolute; left: 0; right: 0; top: 0; height: 1290px;
+      display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+      text-align: center; padding: 0 70px; color: #fff;
+    }
+    .sm {
+      font-family: "Inter", sans-serif; font-weight: 600; font-size: 64px; line-height: 1.12;
+      letter-spacing: -0.01em; text-shadow: 0 2px 18px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.5); margin-bottom: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 0 14px; flex-wrap: wrap;
+    }
+    .bg {
+      font-family: "Instrument Serif", serif; font-style: italic; font-weight: 400;
+      line-height: 0.92; letter-spacing: -0.02em; text-shadow: 0 4px 30px rgba(0,0,0,0.45);
+      max-width: 960px;
+    }
+    .w { display: inline-block; }
+    .logo { height: 60px; width: 60px; display: inline-block; }
+    .badge {
+      width: 132px; height: 132px; border-radius: 34px; background: #fff; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.35); margin-bottom: 30px;
+    }
+    .badge img { width: 84px; height: 84px; }
+    .pair { display: flex; gap: 34px; align-items: center; margin-bottom: 34px; }
+    .pair .badge { margin-bottom: 0; }
+    .pair .x { font-family: "Inter", sans-serif; font-size: 56px; color: rgba(255,255,255,0.8); }
+    #cbox {
+      width: 820px; height: 112px; border-radius: 56px; margin-bottom: 44px;
+      background: rgba(20,20,20,0.72); border: 2px solid rgba(255,255,255,0.22);
+      display: flex; align-items: center; padding: 0 22px; gap: 22px;
+      font-family: "Inter", sans-serif; font-size: 46px; color: #fff; text-align: left;
+    }
+    #cbox .av { width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #f58529, #dd2a7b 50%, #8134af); flex: none; }
+    #cbox .field { position: relative; flex: 1; height: 50px; }
+    #cbox .ph { position: absolute; left: 0; top: 0; color: rgba(255,255,255,0.5); }
+    #cbox .typed { position: absolute; left: 0; top: 0; font-weight: 700; letter-spacing: 0.04em; }
+    #cbox .typed span { opacity: 0; }
+    #cbox .post { font-weight: 700; color: #4f9bff; opacity: 0.4; }
+    .strike { position: relative; }
+    .strike::after { content: ""; position: absolute; left: -2%; right: -2%; top: 54%; height: 7px; background: #d97757; transform-origin: 0 50%; transform: scaleX(var(--s, 0)); border-radius: 4px; }
+  </style>
+  <div id="root" data-composition-id="type" data-width="1080" data-height="1920" data-layout-allow-overflow>
+    <!-- 0: hook / cover frame -->
+    <div id="g1" class="clip grp" data-start="0" data-duration="1.8">
+      <div class="sm"><img class="logo" src="assets/logos/claude.svg" alt="" /><span class="w">claude just killed</span></div>
+      <div class="bg" style="font-size: 228px"><span class="w" id="g1-big">Instagram.</span></div>
+    </div>
+    <div id="g2" class="clip grp" data-start="1.8" data-duration="0.671">
+      <div class="sm"><span class="w" data-t="1.8">poori</span><span class="w" data-t="2.011">team</span><span class="w" data-t="2.201">ka</span></div>
+      <div class="bg" style="font-size: 230px"><span class="w" data-t="2.291">kaam,</span></div>
+    </div>
+    <div id="g3" class="clip grp" data-start="4.141" data-duration="1.169">
+      <div class="sm"><span class="w" data-t="4.141">bhai,</span></div>
+      <div class="bg" style="font-size: 196px"><span class="w" data-t="4.441">screenshot</span><br /><span class="w" data-t="4.941">le lo.</span></div>
+    </div>
+    <div id="g4" class="clip grp" data-start="5.31" data-duration="1.267">
+      <div class="sm"><span class="w" data-t="5.31">kya</span><span class="w" data-t="5.51">post</span><span class="w" data-t="5.73">karein?</span></div>
+      <div class="bg" style="font-size: 220px"><span class="w" data-t="5.96">pata</span> <span class="w" data-t="6.211">nahi.</span></div>
+    </div>
+    <div id="g5" class="clip grp" data-start="12.98" data-duration="0.98">
+      <div class="sm"><span class="w" data-t="12.98">hook</span></div>
+      <div class="bg" style="font-size: 172px"><span class="w" data-t="13.191">nahi</span> <span class="w" data-t="13.44">soojh</span><br /><span class="w" data-t="13.621">raha?</span></div>
+    </div>
+    <div id="g6" class="clip grp" data-start="21.11" data-duration="2.924">
+      <div class="badge w" data-t="22.229"><img src="assets/logos/openai.svg" alt="" /></div>
+      <div class="sm"><span class="w" data-t="21.11">taaki</span><span class="w" data-t="21.25">koi</span><span class="w" data-t="21.37">na</span><span class="w" data-t="21.581">bole</span><span class="w" data-t="21.87">ki ye</span></div>
+      <div class="bg" style="font-size: 172px"><span class="w strike" id="g6-gpt" data-t="22.291">ChatGPT</span><br /><span class="w" data-t="22.938">ne likha.</span></div>
+    </div>
+    <div id="g7" class="clip grp" data-start="26.12" data-duration="0.96">
+      <div id="cbox" class="w" data-t="26.12">
+        <div class="av"></div>
+        <div class="field"><span class="ph" id="ph">Add a comment…</span><span class="typed"><span>S</span><span>K</span><span>I</span><span>L</span><span>L</span></span></div>
+        <div class="post" id="post">Post</div>
+      </div>
+      <div class="sm"><span class="w" data-t="26.12">comment</span><span class="w" data-t="26.511">karo</span></div>
+      <div class="bg" style="font-size: 240px"><span class="w" data-t="26.72">SKILL</span></div>
+    </div>
+    <div id="g8" class="clip grp" data-start="27.08" data-duration="1.96">
+      <div class="badge w" data-t="27.08"><img src="assets/logos/instagram.svg" alt="" /></div>
+      <div class="sm"><span class="w" data-t="27.08">link milega</span></div>
+      <div class="bg" style="font-size: 220px"><span class="w" data-t="28.267">DMs</span> <span class="w" data-t="28.473">mein.</span></div>
+    </div>
+    <div id="g9" class="clip grp" data-start="29.04" data-duration="2.015">
+      <div class="pair">
+        <div class="badge w" data-t="29.339"><img src="assets/logos/instagram.svg" alt="" /></div>
+        <span class="x w" data-t="29.724">×</span>
+        <div class="badge w" data-t="29.96"><img src="assets/logos/claude.svg" alt="" /></div>
+      </div>
+      <div class="sm"><span class="w" data-t="29.04">ab</span><span class="w" data-t="29.339">instagram,</span></div>
+      <div class="bg" style="font-size: 196px"><span class="w" data-t="29.96">Claude</span><br /><span class="w" data-t="30.511">chalayega.</span></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const root = document.querySelector('[data-composition-id="type"]');
+    // Word reveals: each word arrives on its spoken time (blur-to-sharp, small rise).
+    root.querySelectorAll(".w[data-t]").forEach((el) => {
+      const t = parseFloat(el.dataset.t);
+      const big = el.closest(".bg");
+      tl.fromTo(el,
+        { opacity: 0, y: big ? 40 : 18, filter: "blur(12px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: big ? 0.42 : 0.3, ease: "power3.out" }, Math.max(0, t - 0.04));
+    });
+    // Hook frame: already on screen at frame 0, the big word breathes in.
+    tl.fromTo("#g1-big", { scale: 1.06 }, { scale: 1, duration: 1.376, ease: "power2.out" }, 0);
+    // Comment typing
+    root.querySelectorAll("#cbox .typed span").forEach((s, i) => tl.to(s, { opacity: 1, duration: 0.01 }, 26.729 + i * 0.07));
+    tl.set("#ph", { opacity: 0 }, 26.72);
+    tl.to("#post", { opacity: 1, duration: 0.1 }, 26.886);
+    // ChatGPT strike-through
+    tl.fromTo("#g6-gpt", { "--s": 0 }, { "--s": 1, duration: 0.35, ease: "power2.inOut" }, 23.109);
+    // Group exits with a hard kill
+    root.querySelectorAll(".grp").forEach((g) => {
+      const s = parseFloat(g.dataset.start), d = parseFloat(g.dataset.duration), e = s + d;
+      if (g.id === "g9") return;
+      tl.to(g, { opacity: 0, duration: 0.1, ease: "power2.in" }, e - 0.1);
+      tl.set(g, { opacity: 0 }, e);
+    });
+    window.__timelines["type"] = tl;
+  </script>
+</template>

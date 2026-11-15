@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      :root { --paper: #f3efe8; --ink: #141414; --accent: #d97757; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+      #root { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+      #facewrap { position: absolute; inset: 0; overflow: hidden; }
+      #face { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      #scrim { position: absolute; inset: 0; pointer-events: none;
+        background: linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.38) 62%, rgba(0,0,0,0.55) 78%, rgba(0,0,0,0.25) 100%); }
+      #flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+      .scene { position: absolute; inset: 0; }
+    </style>
+  </head>
+  <body>
+    <!-- data-full = reel.py cut rewrites data-duration to the cut length -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="30" data-full data-width="1080" data-height="1920">
+      <div id="facewrap" data-layout-allow-overflow>
+        <video id="face" class="clip" src="assets/face.mp4" data-start="0" data-duration="30" data-full data-track-index="0" muted playsinline></video>
+        <div id="scrim"></div>
+      </div>
+
+      <!-- Kinetic type over the face shots -->
+      <div id="type-host" class="clip scene" data-composition-id="type" data-composition-src="compositions/type.html"
+        data-start="0" data-duration="30" data-full data-track-index="1" data-track-kind="captions" style="z-index: 5"></div>
+
+      <!-- Cutaways: one host per scene; times are root-timeline seconds from edit/words.json -->
+      <div id="card-host" class="clip scene" data-composition-id="card" data-composition-src="compositions/card.html"
+        data-start="5" data-duration="2" data-track-index="2" data-track-kind="graphics" style="z-index: 10"></div>
+      <div id="statement-host" class="clip scene" data-composition-id="statement" data-composition-src="compositions/statement.html"
+        data-start="9" data-duration="1.6" data-track-index="3" data-track-kind="graphics" style="z-index: 10"></div>
+
+      <div id="flash" class="clip" data-start="0" data-duration="0.5" data-track-index="5" style="z-index: 20"></div>
+
+      <!-- Sound. Music is off by default: the user adds a trending IG track in-app. -->
+      <audio id="voice" src="assets/voice.wav" data-start="0" data-duration="30" data-full data-track-index="6" data-volume="1"></audio>
+      <!-- <audio id="music" src="assets/music.wav" data-start="0" data-duration="30" data-full data-track-index="11" data-volume="1"></audio> -->
+      <!-- SFX: whoosh 0.22 on scene entries (start 0.05 s early), pop 0.35-0.4 on badges/cards, tick 0.45 on counters, sfx_003 0.45 on clicks, shutter 0.6 on flash -->
+      <audio id="sfx-w1" src="assets/sfx/whoosh.mp3" data-start="4.95" data-duration="0.9" data-track-index="7" data-volume="0.22"></audio>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const face = "#face";
+      tl.set(face, { scale: 1, transformOrigin: "50% 38%" }, 0);
+      // Slow push-in on each face stretch (between cutaways); a sharp punch on key words.
+      const drift = (t, d, from, to) => tl.fromTo(face, { scale: from }, { scale: to, duration: d, ease: "none", transformOrigin: "50% 38%" }, t);
+      const punch = (t, from, to) => tl.fromTo(face, { scale: from }, { scale: to, duration: 0.18, ease: "power3.out", transformOrigin: "50% 38%" }, t);
+      drift(0, 5, 1.0, 1.06);
+      // Screenshot flash: tl.fromTo("#flash", { opacity: 0 }, { opacity: 0.85, duration: 0.05, ease: "none" }, T); tl.to("#flash", { opacity: 0, duration: 0.35, ease: "power2.out" }, T + 0.025);
+      // Every jump cut alternates a small punch so cuts read as intentional (written by reel.py cut).
+      tl.set("#facewrap", { scale: 1, transformOrigin: "50% 40%" }, 0);
+      // CUTS:BEGIN
+      // CUTS:END
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

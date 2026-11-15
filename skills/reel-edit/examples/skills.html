@@ -1,0 +1,46 @@
+<template>
+  <style>
+    @font-face { font-family: "Instrument Serif"; font-style: italic; font-weight: 400; src: url("assets/fonts/InstrumentSerif-Italic.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #f3efe8; }
+    #sk-stage { position: absolute; inset: 0; perspective: 2200px; }
+    #sk-card {
+      position: absolute; left: 130px; top: 220px; width: 820px; height: 560px; border-radius: 30px; overflow: hidden;
+      background: #fff; box-shadow: 0 40px 90px rgba(40,30,20,0.22), 0 6px 18px rgba(40,30,20,0.12);
+    }
+    #sk-img { position: absolute; left: 0; top: 0; width: 820px; }
+    #sk-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: linear-gradient(180deg, rgba(255,255,255,0), #fff); }
+    #sk-chip {
+      position: absolute; left: 860px; top: 150px; width: 128px; height: 128px; border-radius: 32px; background: #fff;
+      display: flex; align-items: center; justify-content: center; box-shadow: 0 20px 50px rgba(40,30,20,0.2);
+    }
+    #sk-chip img { width: 80px; height: 80px; }
+    #sk-text { position: absolute; left: 0; right: 0; top: 0; height: 1290px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; color: #141414; }
+    .sm { font-family: "Inter", sans-serif; font-weight: 600; font-size: 64px; letter-spacing: -0.015em; display: flex; gap: 14px; margin-bottom: 4px; }
+    .bg { font-family: "Instrument Serif", serif; font-style: italic; font-size: 212px; line-height: 0.9; letter-spacing: -0.02em; }
+    .bg .acc { color: #d97757; }
+    .w { display: inline-block; }
+  </style>
+  <div id="root" data-composition-id="skills" data-width="1080" data-height="1920">
+    <div id="sk-stage">
+      <div id="sk-card"><img id="sk-img" src="assets/shots/github-13.png" alt="" /><div id="sk-fade"></div></div>
+      <div id="sk-chip"><img src="assets/logos/claude.svg" alt="" /></div>
+    </div>
+    <div id="sk-text">
+      <div class="sm"><span class="w" data-t="0">ab</span><span class="w" data-t="0.09">bas</span></div>
+      <div class="bg"><span class="w acc" data-t="0.269">13</span> <span class="w" data-t="0.529">free</span><br /><span class="w" data-t="0.829">skills.</span></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const root = document.querySelector('[data-composition-id="skills"]');
+    tl.fromTo("#sk-card", { y: 260, rotationX: 22, rotationY: -14, opacity: 0 }, { y: 0, rotationX: 9, rotationY: -6, opacity: 1, duration: 0.392, ease: "expo.out", transformOrigin: "50% 60%" }, 0);
+    tl.to("#sk-card", { rotationX: 4, rotationY: -2, duration: 1.278, ease: "none" }, 0.392);
+    tl.fromTo("#sk-img", { y: 0 }, { y: -980, duration: 1.67, ease: "power1.inOut" }, 0);
+    tl.fromTo("#sk-chip", { scale: 0.6, opacity: 0, rotation: -12 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.5, ease: "back.out(2)" }, 0.176);
+    root.querySelectorAll(".w[data-t]").forEach((el) => {
+      const t = parseFloat(el.dataset.t), big = el.closest(".bg");
+      tl.fromTo(el, { opacity: 0, y: big ? 40 : 18, filter: "blur(12px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: big ? 0.42 : 0.3, ease: "power3.out" }, t);
+    });
+    window.__timelines["skills"] = tl;
+  </script>
+</template>
