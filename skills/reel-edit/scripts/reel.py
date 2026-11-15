@@ -23,8 +23,11 @@ HF = ["npx", "--yes", "hyperframes@0.9.46"]
 GRADE = ("eq=contrast=1.06:saturation=0.88,"
          "curves=all='0/0.02 0.25/0.22 0.75/0.79 1/0.98',"
          "colorbalance=rs=-0.015:bs=0.025:rh=0.025:bh=-0.015,vignette=angle=PI/5")
-VOICE = ("highpass=f=80,afftdn=nr=10:nf=-40,"
-         "acompressor=threshold=-20dB:ratio=3:attack=5:release=80,loudnorm=I=-14:TP=-1.5:LRA=9")
+# iPhone voice is dull (little 3-10 kHz); FFT denoise made it duller, so: de-mud + presence + air, de-ess, compress.
+# The cut removes the pauses, so room noise between words never reaches the reel.
+VOICE = ("highpass=f=90,lowshelf=f=160:g=-2,equalizer=f=300:t=q:w=1:g=-3,equalizer=f=3600:t=q:w=0.9:g=7,"
+         "highshelf=f=8500:g=4,deesser=i=0.35,acompressor=threshold=-20dB:ratio=3:attack=5:release=80,"
+         "loudnorm=I=-14:TP=-1.5:LRA=7")
 X264 = ["-c:v", "libx264", "-preset", "medium", "-crf", "17", "-pix_fmt", "yuv420p",
         "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
         "-g", "30", "-movflags", "+faststart"]
@@ -130,12 +133,12 @@ def cmd_prep(a):
             srcs.append(out)
         else:
             srcs.append(clip)
-    ins = sum([["-i", s] for s in srcs], [])
+    ins = sum([["-i", s] for s in srcs], []) + sum([["-i", c] for c in a.clips], [])
     n = len(srcs)
     fc = []
     for i in range(n):
         fc.append(f"[{i}:v]fps=30,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1[v{i}]")
-        fc.append(f"[{i}:a]aresample=48000,aformat=channel_layouts=stereo[a{i}]")
+        fc.append(f"[{n + i}:a:0]aresample=48000,aformat=channel_layouts=stereo[a{i}]")
     fc.append("".join(f"[v{i}][a{i}]" for i in range(n)) + f"concat=n={n}:v=1:a=1[vc][ac]")
     fc.append(f"[vc]{GRADE},setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709[vo]"); fc.append(f"[ac]{VOICE}[ao]")
     run(["ffmpeg", "-y", "-v", "error", *ins, "-filter_complex", ";".join(fc),
@@ -167,9 +170,9 @@ def cmd_cut(a):
     face, voice = os.path.join(E, "face_src.mp4"), os.path.join(E, "voice_src.wav")
     db = energy_db(voice); END = len(db) * 0.01
     srt = sorted(db); floor, loud = srt[len(srt) // 10], srt[len(srt) * 9 // 10]
-    th = a.th if a.th is not None else max(-30.5, floor + 4)
+    th = a.th if a.th is not None else max(-30.5, floor + 4, loud - 10)
     print(f"noise floor {floor:.1f} dB, speech {loud:.1f} dB, threshold {th:.1f} dB")
-    segs = speech_segments(db, th)
+    segs = speech_segments(db, th, min_gap=a.gap)
     # --drop uses CUT times (as printed by `words`); mapped back to source through the last cuts.json.
     # Drops accumulate in edit/drops.json; `--reset` clears them.
     dj = os.path.join(E, "drops.json")
@@ -195,15 +198,15 @@ def cmd_cut(a):
                 if s0 < x - 0.08: out.append([s0, x])
                 if e0 > y + 0.08: out.append([y, e0])
         segs = out
-    PRE, POST = 0.06, 0.08
+    PRE, POST = a.pre, a.post
     keep = []
     for s, e in segs:
         x, y = max(0, s - PRE), min(END, e + POST)
         if keep and x <= keep[-1][1]: keep[-1][1] = y
         else: keep.append([x, y])
     if keep: keep[-1][1] = min(END, keep[-1][1] + a.tail)
-    # micro pauses inside kept spans (breaths, "uh" gaps): >= 0.12 s below th+3.5
-    dip_th, PAD, spans = th + 3.5, 0.035, []
+    # micro pauses inside kept spans (breaths, "uh" gaps): >= 0.12 s below th + --dip
+    dip_th, PAD, spans = th + a.dip, 0.035, []
     for s, e in keep:
         cur, st = s, None
         for k in range(int(s * 100) + 8, int(e * 100) - 8):
@@ -461,8 +464,13 @@ def main():
     s = sub.add_parser("cut"); s.add_argument("project"); s.add_argument("--speed", type=float, default=1.12)
     s.add_argument("--drop", help="ranges to remove in CURRENT cut time (from `words`), e.g. 3.1-5.4,20-22.5")
     s.add_argument("--reset", action="store_true", help="forget earlier drops")
-    s.add_argument("--th", type=float, help="speech threshold dB (default: auto, about -30.5)")
-    s.add_argument("--tail", type=float, default=0.35, help="extra hold after the last word"); s.set_defaults(f=cmd_cut)
+    s.add_argument("--th", type=float, help="speech threshold dB (default: auto = max(-30.5, noise floor + 4, speech level - 10))")
+    s.add_argument("--tail", type=float, default=0.35, help="extra hold after the last word")
+    s.add_argument("--gap", type=float, default=0.14, help="pauses shorter than this stay inside a phrase")
+    s.add_argument("--pre", type=float, default=0.05, help="kept before each phrase")
+    s.add_argument("--post", type=float, default=0.07, help="kept after each phrase")
+    s.add_argument("--dip", type=float, default=0.0, help="micro-pause cut: dB above --th that counts as a pause inside a phrase (old default 3.5 chopped soft syllables)")
+    s.set_defaults(f=cmd_cut)
     s = sub.add_parser("words"); s.add_argument("project"); s.add_argument("--model", default="medium")
     s.add_argument("--language", default="en")
     s.add_argument("--script", help="text file with the spoken lines as recorded (e.g. Roman Hinglish); aligns these words instead of trusting ASR text")
