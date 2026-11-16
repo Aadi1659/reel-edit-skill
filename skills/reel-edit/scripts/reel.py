@@ -25,9 +25,9 @@ GRADE = ("eq=contrast=1.06:saturation=0.88,"
          "colorbalance=rs=-0.015:bs=0.025:rh=0.025:bh=-0.015,vignette=angle=PI/5")
 # iPhone voice is dull (little 3-10 kHz); FFT denoise made it duller, so: de-mud + presence + air, de-ess, compress.
 # The cut removes the pauses, so room noise between words never reaches the reel.
-VOICE = ("highpass=f=90,lowshelf=f=160:g=-2,equalizer=f=300:t=q:w=1:g=-3,equalizer=f=3600:t=q:w=0.9:g=7,"
-         "highshelf=f=8500:g=4,deesser=i=0.35,acompressor=threshold=-20dB:ratio=3:attack=5:release=80,"
-         "loudnorm=I=-14:TP=-1.5:LRA=7")
+# Raw voice by default: no EQ, no denoise, no de-ess (creators often prefer their own sound). prep leaves the voice
+# untouched; after every cut, level_voice() applies plain gain + a peak limiter to -14 LUFS.
+VOICE = "aresample=48000"
 X264 = ["-c:v", "libx264", "-preset", "medium", "-crf", "17", "-pix_fmt", "yuv420p",
         "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
         "-g", "30", "-movflags", "+faststart"]
@@ -66,6 +66,19 @@ def fmt(v):
 
 
 # ---------------------------------------------------------------- new
+def level_voice(path):
+    """Plain gain + peak limiter to -14 LUFS (raw voice, no EQ). Used after every cut."""
+    raw = path.replace(".wav", "_raw.wav")
+    shutil.copy(path, raw)
+    lu = subprocess.run(["ffmpeg", "-v", "info", "-i", raw, "-af", "ebur128=framelog=quiet", "-f", "null", "-"],
+                        capture_output=True, text=True).stderr
+    I = float([l for l in lu.splitlines() if l.strip().startswith("I:")][-1].split()[1])
+    g = round(-14 - I, 2)
+    run(["ffmpeg", "-y", "-v", "error", "-i", raw, "-af", f"volume={g}dB,alimiter=limit=0.89:attack=5:release=50:level=disabled",
+         "-c:a", "pcm_s16le", "-ar", "48000", path])
+    return g
+
+
 def cmd_new(a):
     dst = os.path.abspath(a.project)
     if os.path.exists(dst):
@@ -230,6 +243,7 @@ def cmd_cut(a):
     run(["ffmpeg", "-y", "-v", "error", "-i", face, "-i", voice, "-filter_complex_script", os.path.join(E, "cut_fc.txt"),
          "-map", "[vo]", *X264, os.path.join(A, "face.mp4"),
          "-map", "[ao]", "-c:a", "pcm_s16le", "-ar", "48000", os.path.join(A, "voice.wav")])
+    level_voice(os.path.join(A, "voice.wav"))
     total = round(dur(os.path.join(A, "voice.wav")), 3)
     acc, bounds = 0, []
     for s, e in spans[:-1]:

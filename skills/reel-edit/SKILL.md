@@ -24,10 +24,14 @@ P=./reels/reel-NN                              # one project per reel
 
 ```bash
 python3 $R new   $P                                  # template: index.html, type/card/statement scenes, fonts; downloads logos + sfx
-python3 $R prep  $P "/path/IMG_1.MOV" [more clips]   # HLG->SDR (swift), 1080x1920 30fps, cinematic grade, bright voice
-python3 $R cut   $P                                  # remove dead air + micro pauses, speed 1.12x; patches index.html
+python3 $R prep  $P "/path/IMG_1.MOV" [more clips]   # HLG->SDR (swift), 1080x1920 30fps, cinematic grade; voice stays RAW
+python3 ~/.claude/skills/reel-edit/scripts/recut.py $P --speed 1.05 --maxtail 0.7   # gentle cut: whole sentences (recommended)
 python3 $R words $P                                  # Whisper on the CUT voice, onset-snapped -> edit/words.json (prints phrases)
+python3 ~/.claude/skills/reel-edit/scripts/logos.py $P gemini="Google Gemini|Google LLC" site=https://example.com   # real logos
 ```
+
+`python3 $R cut $P` is the older tight cut (removes micro pauses, 1.12x). It is faster but can clip soft word endings;
+prefer `recut.py` unless the speaker wants a very punchy rhythm.
 
 - Pass raw clips from wherever they are. Several clips = joined in the order given.
 - **Words.** Whisper usually returns good word times (use them as they are). For mixed-language speech such as Hinglish it sometimes *translates* to English instead; `words` then prints a WARNING. In that case write what was actually said (e.g. Roman Hinglish, with punctuation at each phrase break; the English shows you what was said) to `edit/script.txt` and run `words $P --script $P/edit/script.txt`. That aligns the script to the real pauses and onsets, accurate to about 0.1 s on most phrases but up to about 0.6 s on rapid lists ("caption, reply, DMs"). Snap those moments and nudge `data-t` by hand.
@@ -50,10 +54,41 @@ Work from `edit/words.json` + the script/beat sheet.
 3. **Face motion** in index.html: `drift(t, d, 1.0, 1.06)` on every face stretch between cutaways; `punch(t, 1.06, 1.16)` on 1-2 key words; flash + shutter for "screenshot".
 4. **SFX** (in `assets/sfx`): whoosh 0.22 at each cutaway entry (−0.05 s), pop 0.35-0.4 on badges/cards, tick 0.45 on counters, sfx_003 0.45 on clicks/cards, shutter 0.6 on flash. Same track index can't overlap - alternate 7-10.
 
+
+## Editing rules (learned from real redos)
+
+These came from edits a creator sent back. Following them avoids the most common "redo this" notes.
+
+**Cut**
+1. Never cut a sentence short. Keep soft endings ("-s", trailing vowels) and the pauses inside a sentence; only remove
+   dead air between sentences and the retakes. Speed 1.05 at most. `recut.py` does this; `--add` / `--cut` / `--drop`
+   take SOURCE seconds (one comma list per flag).
+2. Before building, transcribe every kept span on its own and check its last word. If a take trails off, use another take.
+3. Fade every join (40 ms in / 80 ms out). Extend an end only while the voice is still going; stop at real silence
+   (`--maxtail` does this) and never run into the next sound.
+4. If something was playing in the room while recording (a reference video, music), keep the speech threshold above its
+   level so fragments of it never survive the cut.
+5. Long Whisper runs on mixed-language speech can loop on one line. Transcribe 25 s chunks or each span separately.
+
+**Look**
+6. Keep the voice raw (gain + limiter only) unless the speaker asks for processing.
+7. Real logos only: the product's official app icon (`logos.py` uses the App Store's artwork) or the product site's own
+   icon/vector logo. Never a placeholder letter tile, never the parent company's logo for a product, never an upscaled
+   48 px favicon. Look at `assets/logos/app/_sheet.png` before building.
+8. When a name is spoken, its logo and name pop in on that word. For lists, time names from per-sentence transcripts
+   mapped onto the cut; a whole-reel alignment drifts by about a second.
+9. Don't put small joiner words ("and", "or") between names in a big header: header = number + category, names under the logos.
+10. Only web fonts render reliably: Inter and Instrument Serif ship in `assets/fonts`. System fonts and Apple Color Emoji
+    fail `check`; draw emoji with Twemoji SVGs.
+11. Every claim on screen must be true on the day you post. Put limits on screen ("50 free credits/day"); if a price
+    can't be confirmed, don't call it free.
+
 ## Optional layout: face-down window
 
 For proof-heavy reels, keep the hook full-frame, then slide the face video down into a rounded window in the lower half and put
-titles + proof cards above it. A cut-out of the speaker on top lets the hair or hands break over the window edge.
+titles + proof cards above it. A cut-out of the speaker on top lets the hair or hands break over the window edge (optional: many creators prefer the
+plain video in the window, which is faster and keeps their real background; then hide the cut-out layer).
+`scripts/lib_v2.py` has the shared pieces for this layout: window move, header type groups, word reveals, SFX tracks.
 
 - Cut-out: `npx --yes hyperframes@0.9.46 remove-background assets/face.mp4 -o assets/face_cut.webm --quality best`
   (runs locally, roughly 6 min for 14 s on Apple silicon). Give the cut-out clip `data-start="0" data-media-start="0"` so it decodes in sync.
@@ -66,7 +101,8 @@ titles + proof cards above it. A cut-out of the speaker on top lets the hair or 
 
 ## Real assets only
 
-- Logos: `npx --yes hyperframes@0.9.46 media-use resolve --type logo --entity "<Name>"` (thesvg). If it returns a low-res .ico (ChatGPT did), use simple-icons: `https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/<slug>.svg`. `new` downloads claude/instagram/openai/github from simple-icons.
+- Logos: `scripts/logos.py` first (official app icons / the product site's own logo). For simple monochrome marks you can
+  also use `npx --yes hyperframes@0.9.46 media-use resolve --type logo --entity "<Name>"` (thesvg). If it returns a low-res .ico (ChatGPT did), use simple-icons: `https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/<slug>.svg`. `new` downloads claude/instagram/openai/github from simple-icons.
 - Web pages (GitHub, docs, product sites): screenshot with the cached chrome-headless-shell at deviceScaleFactor 2.7 → `assets/shots/`. Delete the placeholder `shot.png`.
 - Instagram thumbnails / view counts: read from the logged-in built-in browser. Blur other creators' handles.
 - Never invent numbers on screen; every stat must match a real screenshot.
@@ -89,8 +125,8 @@ Snap the cover frame, one moment per cutaway, and the end. Fix, re-snap only wha
 ## Gotchas
 
 - iPhone clips are HLG HDR: `prep` tone-maps them; if a render comes out HDR/washed, the face file lost its bt709 tags.
-- Phone voice is often dull (little energy at 3-10 kHz). `prep` reads the audio straight from the original clip and uses de-mud + presence (+7 dB at 3.6 kHz) + an air shelf + de-ess, with no FFT denoise (it removes the highs that make speech crisp). The cut removes the pauses, so room noise between words never reaches the reel.
+- Voice: `prep` reads the audio straight from the original clip and keeps it raw; the cut levels it to -14 LUFS with plain gain + a limiter. If a speaker wants a brighter sound, add EQ yourself and let them approve it by ear first.
 - A GSAP `fromTo` placed later on an element that is visible earlier needs `immediateRender: false`, or its from-state shows from frame 0.
-- Inter loads from the system; Instrument Serif from `assets/fonts` (each scene declares its own `@font-face`).
+- Inter and Instrument Serif load from `assets/fonts` (each composition declares its own `@font-face`); never rely on system fonts.
 - Every timed element needs `class="clip"`; a scene's timeline must be registered as `window.__timelines["<composition-id>"]`.
 - Text safe zone: y 230-1440, keep the right 230 px clear of key text (IG buttons).

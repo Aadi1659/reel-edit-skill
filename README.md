@@ -5,8 +5,9 @@ Record yourself talking to the camera. Drop the clips into Claude Code, say **"e
 
 What it does, step by step:
 
-- **prep**: iPhone HDR (HLG) to normal SDR, 30 fps, a cinematic grade, voice cleanup and loudness
-- **cut**: removes dead air and micro pauses, speeds up slightly, adds jump-cut punch-ins
+- **prep**: iPhone HDR (HLG) to normal SDR, 30 fps, a cinematic grade; your voice stays raw
+- **recut**: removes dead air and retakes but keeps every sentence whole, with soft joins, then levels the voice to -14 LUFS
+- **logos**: fetches the real app icons of the tools you mention (App Store artwork or the product's own site logo)
 - **words**: Whisper word timings, so every word on screen lands exactly when you say it
 - **edit**: big serif kinetic type over your face, plus cutaways (real screenshots in a card, logo statements)
 - **check, snap, render**: catches overlap errors, shows a cheap preview strip, then one final render
@@ -36,7 +37,7 @@ You can also run the steps yourself:
 R=~/.claude/skills/reel-edit/scripts/reel.py
 python3 $R new    reels/reel-01
 python3 $R prep   reels/reel-01 /path/IMG_1234.MOV
-python3 $R cut    reels/reel-01
+python3 ~/.claude/skills/reel-edit/scripts/recut.py reels/reel-01 --speed 1.05 --maxtail 0.7
 python3 $R words  reels/reel-01
 python3 $R render reels/reel-01 reel-01
 ```
@@ -46,6 +47,7 @@ python3 $R render reels/reel-01 reel-01
 - **Code and templates**: MIT (see `LICENSE`).
 - **Font**: Instrument Serif, SIL Open Font License 1.1 (`template/assets/fonts/OFL.txt`).
 - **Sound effects** are not in this repo. `new` copies them from HyperFrames' bundled library (Pixabay Content License).
-- **Logos** are not in this repo. `new` downloads them from [simple-icons](https://simpleicons.org) (CC0). The marks belong
-  to their owners. Only use them to refer to the product.
+- **Logos** are not in this repo. `new` downloads a few from [simple-icons](https://simpleicons.org) (CC0) and `logos.py`
+  downloads official app icons at edit time. The marks belong to their owners. Only use them to refer to the product.
+- **Inter** font: SIL Open Font License 1.1 (`template/assets/fonts/Inter-NOTICE.txt`).
 - Use only footage, screenshots and music you have the rights to.
